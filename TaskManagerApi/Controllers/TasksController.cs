@@ -38,5 +38,20 @@ namespace TaskManagerApi.Controllers
 
             return Ok(existingTask);
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTask(int id)
+        {
+            var task = TaskData.Tasks.FirstOrDefault(x => x.Id == id);
+
+            if (task == null)
+            {
+                return NotFound("Task not found");
+            }
+
+            TaskData.Tasks.Remove(task);
+
+            return Ok("Task deleted successfully");
+        }
     }
 }
