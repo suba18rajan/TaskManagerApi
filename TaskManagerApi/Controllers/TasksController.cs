@@ -9,16 +9,24 @@ namespace TaskManagerApi.Controllers
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
     {
+        private readonly AppDbContext _context;
+
+        public TasksController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         public IActionResult GetTasks()
         {
-            return Ok(TaskData.Tasks);
+            return Ok(_context.Tasks.ToList());
         }
 
         [HttpPost]
         public IActionResult CreateTask(TaskItem newTask)
         {
-            TaskData.Tasks.Add(newTask);
+            _context.Tasks.Add(newTask);
+            _context.SaveChanges();
 
             return Ok(newTask);
         }
@@ -26,7 +34,7 @@ namespace TaskManagerApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateTask(int id, TaskItem updatedTask)
         {
-            var existingTask = TaskData.Tasks.FirstOrDefault(x => x.Id == id);
+            var existingTask = _context.Tasks.FirstOrDefault(x => x.Id == id);
 
             if (existingTask == null)
             {
@@ -36,20 +44,23 @@ namespace TaskManagerApi.Controllers
             existingTask.Title = updatedTask.Title;
             existingTask.IsCompleted = updatedTask.IsCompleted;
 
+            _context.SaveChanges();
+
             return Ok(existingTask);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteTask(int id)
         {
-            var task = TaskData.Tasks.FirstOrDefault(x => x.Id == id);
+            var task = _context.Tasks.FirstOrDefault(x => x.Id == id);
 
             if (task == null)
             {
                 return NotFound("Task not found");
             }
 
-            TaskData.Tasks.Remove(task);
+            _context.Tasks.Remove(task);
+            _context.SaveChanges();
 
             return Ok("Task deleted successfully");
         }
