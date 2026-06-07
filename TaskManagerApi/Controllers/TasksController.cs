@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManagerApi.Data;
 using TaskManagerApi.Models;
+using TaskManagerApi.Services;
 using System.Linq;
 
 namespace TaskManagerApi.Controllers
@@ -9,58 +10,44 @@ namespace TaskManagerApi.Controllers
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
     {
+        private readonly ITaskService _taskService;
         private readonly AppDbContext _context;
-
-        public TasksController(AppDbContext context)
+        public TasksController(ITaskService taskService, AppDbContext context)
         {
+            _taskService = taskService;
             _context = context;
         }
 
         [HttpGet]
         public IActionResult GetTasks()
         {
-            return Ok(_context.Tasks.ToList());
+            return Ok(_taskService.GetAllTasks());
         }
 
         [HttpPost]
         public IActionResult CreateTask(TaskItem newTask)
         {
-            _context.Tasks.Add(newTask);
-            _context.SaveChanges();
-
-            return Ok(newTask);
+            return Ok(_taskService.CreateTask(newTask));
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateTask(int id, TaskItem updatedTask)
         {
-            var existingTask = _context.Tasks.FirstOrDefault(x => x.Id == id);
+            var result = _taskService.UpdateTask(id, updatedTask);
 
-            if (existingTask == null)
-            {
+            if (result == null)
                 return NotFound("Task not found");
-            }
 
-            existingTask.Title = updatedTask.Title;
-            existingTask.IsCompleted = updatedTask.IsCompleted;
-
-            _context.SaveChanges();
-
-            return Ok(existingTask);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteTask(int id)
         {
-            var task = _context.Tasks.FirstOrDefault(x => x.Id == id);
+            var deleted = _taskService.DeleteTask(id);
 
-            if (task == null)
-            {
+            if (!deleted)
                 return NotFound("Task not found");
-            }
-
-            _context.Tasks.Remove(task);
-            _context.SaveChanges();
 
             return Ok("Task deleted successfully");
         }

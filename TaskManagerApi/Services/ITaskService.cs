@@ -7,5 +7,7 @@ namespace TaskManagerApi.Services
     {
         List<TaskItem> GetAllTasks();
         TaskItem CreateTask(TaskItem task);
+        TaskItem? UpdateTask(int id, TaskItem task);
+        bool DeleteTask(int id);
     }
 }
