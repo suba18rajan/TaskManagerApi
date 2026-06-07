@@ -1,13 +1,14 @@
-﻿using TaskManagerApi.Models;
+﻿using TaskManagerApi.DTOs;
+using TaskManagerApi.Models;
 
 
 namespace TaskManagerApi.Services
 {
     public interface ITaskService
     {
-        List<TaskItem> GetAllTasks();
-        TaskItem CreateTask(TaskItem task);
-        TaskItem? UpdateTask(int id, TaskItem task);
+        List<TaskResponseDTO> GetAllTasks();
+        TaskResponseDTO CreateTask(TaskCreateDTO);
+        TaskResponseDTO? UpdateTask(int id, TaskUpdateDTO dto);
         bool DeleteTask(int id);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace TaskManagerApi.DTOs
 {
-    public class TaskDto
+    public class TaskCreateDTO
     {
         public string Title { get; set; }
     }

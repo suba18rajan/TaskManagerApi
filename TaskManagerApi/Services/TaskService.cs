@@ -1,4 +1,5 @@
 ﻿using TaskManagerApi.Data;
+using TaskManagerApi.DTOs;
 using TaskManagerApi.Models;
 
 namespace TaskManagerApi.Services
@@ -12,32 +13,55 @@ namespace TaskManagerApi.Services
             _context = context;
         }
 
-        public List<TaskItem> GetAllTasks()
+        public List<TaskResponseDTO> GetAllTasks()
         {
-            return _context.Tasks.ToList();
+            return _context.Tasks
+                .Select(t => new TaskResponseDTO
+                {
+                    Id = t.Id,
+                    Title = t.Title,
+                    IsCompleted = t.IsCompleted
+                })
+                .ToList();
         }
 
-        public TaskItem CreateTask(TaskItem task)
+        public TaskResponseDTO CreateTask(TaskCreateDTO dto)
         {
+            var task = new TaskItem
+            {
+                Title = dto.Title,
+                IsCompleted = false
+            };
+
             _context.Tasks.Add(task);
             _context.SaveChanges();
 
-            return task;
+            return new TaskResponseDTO
+            {
+                Id = task.Id,
+                Title = task.Title,
+                IsCompleted = task.IsCompleted
+            };
         }
 
-        public TaskItem? UpdateTask(int id, TaskItem updatedTask)
+        public TaskResponseDTO? UpdateTask(int id, TaskUpdateDTO dto)
         {
-            var existingTask = _context.Tasks.FirstOrDefault(x => x.Id == id);
+            var task = _context.Tasks.FirstOrDefault(x => x.Id == id);
 
-            if (existingTask == null)
+            if (task == null)
                 return null;
 
-            existingTask.Title = updatedTask.Title;
-            existingTask.IsCompleted = updatedTask.IsCompleted;
+            task.Title = dto.Title;
+            task.IsCompleted = dto.IsCompleted;
 
             _context.SaveChanges();
 
-            return existingTask;
+            return new TaskResponseDTO
+            {
+                Id = task.Id,
+                Title = task.Title,
+                IsCompleted = task.IsCompleted
+            };
         }
 
         public bool DeleteTask(int id)

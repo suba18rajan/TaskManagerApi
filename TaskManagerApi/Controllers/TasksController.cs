@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TaskManagerApi.Data;
-using TaskManagerApi.Models;
+using TaskManagerApi.DTOs;
 using TaskManagerApi.Services;
-using System.Linq;
 
 namespace TaskManagerApi.Controllers
 {
@@ -11,11 +9,10 @@ namespace TaskManagerApi.Controllers
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;
-        private readonly AppDbContext _context;
-        public TasksController(ITaskService taskService, AppDbContext context)
+
+        public TasksController(ITaskService taskService)
         {
             _taskService = taskService;
-            _context = context;
         }
 
         [HttpGet]
@@ -25,15 +22,15 @@ namespace TaskManagerApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateTask(TaskItem newTask)
+        public IActionResult CreateTask(TaskCreateDTO dto)
         {
-            return Ok(_taskService.CreateTask(newTask));
+            return Ok(_taskService.CreateTask(dto));
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateTask(int id, TaskItem updatedTask)
+        public IActionResult UpdateTask(int id, TaskUpdateDTO dto)
         {
-            var result = _taskService.UpdateTask(id, updatedTask);
+            var result = _taskService.UpdateTask(id, dto);
 
             if (result == null)
                 return NotFound("Task not found");
