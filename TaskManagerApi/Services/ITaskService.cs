@@ -1,14 +1,15 @@
 ﻿using TaskManagerApi.DTOs;
-using TaskManagerApi.Models;
-
 
 namespace TaskManagerApi.Services
 {
     public interface ITaskService
     {
-        List<TaskResponseDTO> GetAllTasks();
-        TaskResponseDTO CreateTask(TaskCreateDTO dto);
-        TaskResponseDTO? UpdateTask(int id, TaskUpdateDTO dto);
-        bool DeleteTask(int id);
+        Task<List<TaskResponseDTO>> GetAllTasks();
+
+        Task<TaskResponseDTO> CreateTask(TaskCreateDTO dto);
+
+        Task<TaskResponseDTO?> UpdateTask(int id, TaskUpdateDTO dto);
+
+        Task<bool> DeleteTask(int id);
     }
 }

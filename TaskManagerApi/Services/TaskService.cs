@@ -1,4 +1,6 @@
-﻿using TaskManagerApi.Data;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using TaskManagerApi.Data;
 using TaskManagerApi.DTOs;
 using TaskManagerApi.Models;
 
@@ -7,72 +9,57 @@ namespace TaskManagerApi.Services
     public class TaskService : ITaskService
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public TaskService(AppDbContext context)
+        public TaskService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public List<TaskResponseDTO> GetAllTasks()
+        public async Task<List<TaskResponseDTO>> GetAllTasks()
         {
-            return _context.Tasks
-                .Select(t => new TaskResponseDTO
-                {
-                    Id = t.Id,
-                    Title = t.Title,
-                    IsCompleted = t.IsCompleted
-                })
-                .ToList();
+            var tasks = await _context.Tasks.ToListAsync();
+
+            return _mapper.Map<List<TaskResponseDTO>>(tasks);
         }
 
-        public TaskResponseDTO CreateTask(TaskCreateDTO dto)
+        public async Task<TaskResponseDTO> CreateTask(TaskCreateDTO dto)
         {
-            var task = new TaskItem
-            {
-                Title = dto.Title,
-                IsCompleted = false
-            };
+            var task = _mapper.Map<TaskItem>(dto);
+
+            task.IsCompleted = false;
 
             _context.Tasks.Add(task);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return new TaskResponseDTO
-            {
-                Id = task.Id,
-                Title = task.Title,
-                IsCompleted = task.IsCompleted
-            };
+            return _mapper.Map<TaskResponseDTO>(task);
         }
 
-        public TaskResponseDTO? UpdateTask(int id, TaskUpdateDTO dto)
+        public async Task<TaskResponseDTO?> UpdateTask(int id, TaskUpdateDTO dto)
         {
-            var task = _context.Tasks.FirstOrDefault(x => x.Id == id);
+            var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (task == null)
                 return null;
 
-            task.Title = dto.Title;
-            task.IsCompleted = dto.IsCompleted;
+            _mapper.Map(dto, task);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            return new TaskResponseDTO
-            {
-                Id = task.Id,
-                Title = task.Title,
-                IsCompleted = task.IsCompleted
-            };
+            return _mapper.Map<TaskResponseDTO>(task);
         }
 
-        public bool DeleteTask(int id)
+        public async Task<bool> DeleteTask(int id)
         {
-            var task = _context.Tasks.FirstOrDefault(x => x.Id == id);
+            var task = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
 
             if (task == null)
                 return false;
 
             _context.Tasks.Remove(task);
-            _context.SaveChanges();
+
+            await _context.SaveChangesAsync();
 
             return true;
         }
