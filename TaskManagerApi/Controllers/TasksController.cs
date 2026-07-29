@@ -23,6 +23,7 @@ namespace TaskManagerApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetTasks()
         {
             _logger.LogInformation("Getting all tasks.");
@@ -35,6 +36,7 @@ namespace TaskManagerApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> CreateTask(TaskCreateDTO dto)
         {
             _logger.LogInformation("Creating a new task.");
@@ -47,6 +49,7 @@ namespace TaskManagerApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTask(int id, TaskUpdateDTO dto)
         {
             _logger.LogInformation("Updating task with Id {Id}.", id);
@@ -65,6 +68,7 @@ namespace TaskManagerApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTask(int id)
         {
             _logger.LogInformation("Deleting task with Id {Id}.", id);
@@ -75,7 +79,7 @@ namespace TaskManagerApi.Controllers
             {
                 _logger.LogWarning("Task with Id {Id} not found.", id);
                 return NotFound("Task not found");
-            }
+            } 
 
             _logger.LogInformation("Task with Id {Id} deleted successfully.", id);
 

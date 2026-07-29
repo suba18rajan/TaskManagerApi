@@ -18,18 +18,31 @@ namespace TaskManagerApi.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginDTO login)
         {
-            // Temporary hardcoded user
-            if (login.Username != "admin" || login.Password != "admin123")
+            if (login.Username == "admin" &&
+                login.Password == "admin123")
             {
-                return Unauthorized("Invalid username or password.");
+                var token = _jwtService.GenerateToken("admin", "Admin");
+
+                return Ok(new
+                {
+                    Role = "Admin",
+                    Token = token
+                });
             }
 
-            var token = _jwtService.GenerateToken(login.Username);
-
-            return Ok(new
+            if (login.Username == "user" &&
+                login.Password == "user123")
             {
-                Token = token
-            });
+                var token = _jwtService.GenerateToken("user", "User");
+
+                return Ok(new
+                {
+                    Role = "User",
+                    Token = token
+                });
+            }
+
+            return Unauthorized("Invalid username or password.");
         }
     }
 }

@@ -14,11 +14,12 @@ namespace TaskManagerApi.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string username)
+        public string GenerateToken(string username, string role)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role)
             };
 
             var key = new SymmetricSecurityKey(
