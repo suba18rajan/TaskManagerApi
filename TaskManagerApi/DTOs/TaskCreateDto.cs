@@ -2,7 +2,6 @@
 
 namespace TaskManagerApi.DTOs
 {
-    //TaskDTO
     public class TaskCreateDTO
     {
         [Required(ErrorMessage = "Title is required.")]
