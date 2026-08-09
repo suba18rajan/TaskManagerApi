@@ -19,9 +19,23 @@ namespace TaskManagerApi.Services
 
         public async Task<List<TaskResponseDTO>> GetAllTasks()
         {
-            var tasks = await _context.Tasks.ToListAsync();
+            var tasks = await _context.Tasks
+                .AsNoTracking()
+                .ToListAsync();
 
             return _mapper.Map<List<TaskResponseDTO>>(tasks);
+        }
+
+        public async Task<TaskResponseDTO?> GetTaskById(int id)
+        {
+            var task = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (task == null)
+                return null;
+
+            return _mapper.Map<TaskResponseDTO>(task);
         }
 
         public async Task<TaskResponseDTO> CreateTask(TaskCreateDTO dto)

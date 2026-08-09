@@ -33,7 +33,7 @@ namespace TaskManagerApi.Services
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(
+                expires: DateTime.UtcNow.AddMinutes(
                     Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])),
                 signingCredentials: credentials);
 

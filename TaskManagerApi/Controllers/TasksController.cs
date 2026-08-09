@@ -35,6 +35,25 @@ namespace TaskManagerApi.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> GetTaskById(int id)
+        {
+            _logger.LogInformation("Getting task with Id {Id}.", id);
+
+            var task = await _taskService.GetTaskById(id);
+
+            if (task == null)
+            {
+                _logger.LogWarning("Task with Id {Id} not found.", id);
+                return NotFound("Task not found");
+            }
+
+            _logger.LogInformation("Task with Id {Id} retrieved successfully.", id);
+
+            return Ok(task);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> CreateTask(TaskCreateDTO dto)
@@ -45,7 +64,10 @@ namespace TaskManagerApi.Controllers
 
             _logger.LogInformation("Task created successfully.");
 
-            return Ok(task);
+            return CreatedAtAction(
+                nameof(GetTaskById),
+                new { id = task.Id },
+                task);
         }
 
         [HttpPut("{id}")]
@@ -83,7 +105,7 @@ namespace TaskManagerApi.Controllers
 
             _logger.LogInformation("Task with Id {Id} deleted successfully.", id);
 
-            return Ok("Task deleted successfully");
+            return NoContent();
         }
     }
 }
