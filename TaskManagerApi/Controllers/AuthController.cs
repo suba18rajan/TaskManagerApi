@@ -8,41 +8,30 @@ namespace TaskManagerApi.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IJwtService _jwtService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IJwtService jwtService)
+        public AuthController(IAuthService authService)
         {
-            _jwtService = jwtService;
+            _authService = authService;
         }
 
         [HttpPost("login")]
-        public IActionResult Login(LoginDTO login)
+        public async Task<IActionResult> Login(LoginDTO login)
         {
-            if (login.Username == "admin" &&
-                login.Password == "admin123")
-            {
-                var token = _jwtService.GenerateToken("admin", "Admin");
+            var result =
+                await _authService.LoginAsync(login);
 
-                return Ok(new
-                {
-                    Role = "Admin",
-                    Token = token
-                });
+            if (result == null)
+            {
+                return Unauthorized(
+                    "Invalid username or password.");
             }
 
-            if (login.Username == "user" &&
-                login.Password == "user123")
+            return Ok(new
             {
-                var token = _jwtService.GenerateToken("user", "User");
-
-                return Ok(new
-                {
-                    Role = "User",
-                    Token = token
-                });
-            }
-
-            return Unauthorized("Invalid username or password.");
+                Role = result.Value.Role,
+                Token = result.Value.Token
+            });
         }
     }
 }

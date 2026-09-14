@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using TaskManagerApi.DTOs;
 using TaskManagerApi.Services;
 
@@ -24,45 +23,53 @@ namespace TaskManagerApi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> GetTasks()
+        public async Task<IActionResult> GetTasks(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] bool? isCompleted = null)
         {
-            _logger.LogInformation("Getting all tasks.");
+            var result =
+                await _taskService.GetAllTasks(
+                    pageNumber,
+                    pageSize,
+                    search,
+                    isCompleted);
 
-            var tasks = await _taskService.GetAllTasks();
+            _logger.LogInformation(
+                "Retrieved {Count} tasks.",
+                result.Items.Count);
 
-            _logger.LogInformation("Retrieved {Count} tasks.", tasks.Count);
-
-            return Ok(tasks);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> GetTaskById(int id)
+        public async Task<IActionResult> GetTaskById(
+            int id)
         {
-            _logger.LogInformation("Getting task with Id {Id}.", id);
-
-            var task = await _taskService.GetTaskById(id);
+            var task =
+                await _taskService.GetTaskById(id);
 
             if (task == null)
             {
-                _logger.LogWarning("Task with Id {Id} not found.", id);
+                _logger.LogWarning(
+                    "Task {Id} not found.",
+                    id);
+
                 return NotFound("Task not found");
             }
-
-            _logger.LogInformation("Task with Id {Id} retrieved successfully.", id);
 
             return Ok(task);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
-        public async Task<IActionResult> CreateTask(TaskCreateDTO dto)
+        public async Task<IActionResult> CreateTask(
+            TaskCreateDTO dto)
         {
-            _logger.LogInformation("Creating a new task.");
-
-            var task = await _taskService.CreateTask(dto);
-
-            _logger.LogInformation("Task created successfully.");
+            var task =
+                await _taskService.CreateTask(dto);
 
             return CreatedAtAction(
                 nameof(GetTaskById),
@@ -72,38 +79,31 @@ namespace TaskManagerApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateTask(int id, TaskUpdateDTO dto)
+        public async Task<IActionResult> UpdateTask(
+            int id,
+            TaskUpdateDTO dto)
         {
-            _logger.LogInformation("Updating task with Id {Id}.", id);
-
-            var result = await _taskService.UpdateTask(id, dto);
+            var result =
+                await _taskService.UpdateTask(
+                    id,
+                    dto);
 
             if (result == null)
-            {
-                _logger.LogWarning("Task with Id {Id} not found.", id);
                 return NotFound("Task not found");
-            }
-
-            _logger.LogInformation("Task with Id {Id} updated successfully.", id);
 
             return Ok(result);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTask(int id)
+        public async Task<IActionResult> DeleteTask(
+            int id)
         {
-            _logger.LogInformation("Deleting task with Id {Id}.", id);
-
-            var deleted = await _taskService.DeleteTask(id);
+            var deleted =
+                await _taskService.DeleteTask(id);
 
             if (!deleted)
-            {
-                _logger.LogWarning("Task with Id {Id} not found.", id);
                 return NotFound("Task not found");
-            } 
-
-            _logger.LogInformation("Task with Id {Id} deleted successfully.", id);
 
             return NoContent();
         }
